@@ -1,0 +1,19 @@
+table {
+  border: 0px;
+}
+
+td {
+  padding: 4px;
+}
+
+.headings {
+  overflow: hidden;
+}
+
+.headings button.active {
+  background-color: #ccc;
+}
+
+.content {
+  display: none;
+}

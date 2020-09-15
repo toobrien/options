@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <script src="../src/lightweight-charts.js"></script>
+    <script src="../src/basic_client.js"></script>
+    <script defer src="../src/options_chain.js"></script>
+    <script src="../src/returns_histogram.js"></script>
+    <script src="../src/tabs.js"></script>
+    <script defer src="../src/init.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="headings">
+      <button class="link" onclick="load_content(event, 'options_chain')">
+        options chain
+      </button>
+      <button class="link" onclick="load_content(event, 'returns_histogram')">
+        returns histogram
+      </button>
+    </div>
+    <div id="options_chain" class="content">
+      <table >
+        <tr>
+          <td valign="top" class="control">
+            <textarea cols=20, rows=20 id="contracts"></textarea>
+            <br>
+            <button onclick="chain.refresh_contracts()">refresh</button>
+          </td>
+          <td>
+            <div id="chain_view"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div id="returns_histogram" class="content">
+      <table>
+        <tr>
+          <td valign="top" class="control">
+            <input type="text" cols=6 id="histogram_symbol"></input>
+            <button onclick="hist.retrieve_histogram()">update</button>
+          </td>
+          <td>
+            <div id="histogram_view"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

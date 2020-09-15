@@ -1,0 +1,27 @@
+{
+  "name": "market",
+  "version": "1.0.0",
+  "description": "authentication guide: https://developer.tdameritrade.com/content/simple-auth-local-apps app name: x consumer key: NUNBJMU9XQMDAANFOT6G4MQA1I85EG7P",
+  "main": "./src/main.js",
+  "dependencies": {
+    "plotly": "^1.0.6",
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "electron": "^10.1.1",
+    "electron-reload": "^1.5.0"
+  },
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toobrien/market.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toobrien/market/issues"
+  },
+  "homepage": "https://github.com/toobrien/market#readme"
+}
