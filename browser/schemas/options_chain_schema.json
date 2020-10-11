@@ -1,0 +1,82 @@
+
+// options_chart
+{
+    "expiry_list": [ Date, ...],
+    "expiries": {
+        Date: {
+            "call_strikes": [ 315.0, ...],
+            "calls": { 
+                "315.0": {
+                    "volatility": 0.0
+                    // can add other things here later
+                }
+            },
+            "put_strikes": [ 315.0, ...],
+            "puts": { 
+                "315.0": {
+                    "volatility": 0.0
+                }
+            }
+        },
+        ...
+    }
+}
+
+  // tdameritrade API
+  {
+    "[put|call]ExpDateMap": {
+      "yyyy-mm-dd:dte": {
+        "0.0": [
+          {
+            "putCall": "put|call",
+            "symbol": "",
+            "description": "SYM MMM DD YYYY STR [Call|Put] [(Quarterly)|(Weekly)]",
+            "exchangeName": "OPR",
+            "bid": 0.0,
+            "ask": 0.0,
+            "last": 0.0,
+            "mark": 0.0,
+            "bidSize": 0,
+            "askSkiz": 0,
+            "bidAskSize": "0X0",
+            "lastSize": 0,
+            "highPrice": 0.0,
+            "lowPrice": 0.0,
+            "openPrice": 0.0,
+            "closePrice": 0.0,
+            "totalVolume": 0,
+            "tradeDate": "",
+            "tradeTimeInLong": 0,
+            "quoteTimeInLong": 0,
+            "netChange": 0,
+            "volatility": 0.0,
+            "delta": 0.0,
+            "gamma": 0.0,
+            "theta": 0.0,
+            "vega": 0.0,
+            "rho": 0.0,
+            "openInterest": 0,
+            "timeValue": 0.0,
+            "theoreticalOptionValue": 0,
+            "theoreticalVolatility": 0,
+            "strikePrice": 0,
+            "expirationDat": 0,
+            "daysToExpiration": 0,
+            "expirationType": "Q|M|W",
+            "lastTradingDay": 0,
+            "multiplier": 0,
+            "settlementType": "",
+            "deliverableNote": "",
+            "isIndexOption": true,
+            "percentChange": 0.0,
+            "markChange": 0.0,
+            "markPercentChange": 0.0,
+            "mini": true,
+            "nonStandard": true,
+            "inTheMoney": true
+          }
+        ]
+      }
+    }
+  }
+}
