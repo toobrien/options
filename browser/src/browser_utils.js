@@ -140,8 +140,16 @@ function look_back_range(days_back) {
   return { start: start, end: end };
 }
 
+// from stack overflow
+function guid() {
+    var S4 = function() {
+       return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    };
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+}
+
 export {
   sleep, send_request, set_real_time_data,
   build_query_string, register_data_listener,
-  look_back_range
+  look_back_range, guid
 };

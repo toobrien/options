@@ -1,22 +1,20 @@
 import { createChart } from "../src/lightweight-charts.js";
-import { look_back_range } from "../src/browser_utils.js"
+import { look_back_range, guid } from "../src/browser_utils.js"
+import { options_chart_container } from "../src/options_chart_container.js";
 
 class options_chart {
 
-  async refresh() {
-    const symbol = document.getElementById("options_chart_symbol").value;
-    this.symbol = symbol;
-
-    // get price history data for chart
+  async get_ohlc(symbol) {
     const candles = await this.client.price_history(
       symbol, "year", this.range, "daily", "1", undefined, undefined, false
     );
 
-    // format chart data
-    const price_data = [];
+    // format: { time: ISOString, price: float }
+    const ohlc = [];
 
     candles["candles"].forEach((candle) => {
       const time = new Date(0);
+
       time.setUTCSeconds(parseInt(candle.datetime) / 1000);
 
       const formatted = {
@@ -27,25 +25,39 @@ class options_chart {
         close: candle.close
       };
 
-      price_data.push(formatted);
+      ohlc.push(formatted);
     });
 
-    // add whitespace for simulating future prices
-    const firstDateString = price_data[price_data.length - 1].time;             // reuse in options chain API call
-    const firstDate = Date.parse(firstDateString);
+    // add whitespace for future prices: { time: ISOString }
+    const start_str = ohlc[ohlc.length - 1].time;
+    const start = Date.parse(start_str);
 
     for (var i = 1; i < this.lookahead; i++) {
-      const nextDate = new Date(firstDate);
-      nextDate.setDate(nextDate.getDate() + i);
-      price_data.push({ time: nextDate.toISOString() });
+      const next = new Date(start);
+      next.setDate(next.getDate() + i);
+      ohlc.push({ time: next.toISOString() });
     }
 
-    // used below, in option api call
-    const lastDateString = price_data[price_data.length - 1].time;
+    const end_str = ohlc[ohlc.length - 1].time;
 
-    // update chart
-    this.chart.applyOptions(
+    // start and end are used in subsequent options chain api call
+    return {
+      ohlc: ohlc,
+      start: start_str,
+      end: end_str
+    };
+  }
+
+  get_chart(symbol, canvas, ohlc, chain, container) {
+    const chart = window.LightweightCharts.createChart(
+      canvas,
       {
+        width: this.chart_width,
+        height: this.chart_height,
+        crosshair: {
+          // non-magnetic
+          mode: 0
+        },
         watermark: {
           color: 'rgba(11, 94, 29, 0.4)',
           visible: true,
@@ -57,39 +69,60 @@ class options_chart {
       }
     );
 
-    if (this.series != undefined) this.chart.removeSeries(this.series);         // strip old data
-    const price = this.chart.addCandlestickSeries();
-    price.setData(price_data);
-    this.series = price;
+    const series = chart.addCandlestickSeries();
+    series.setData(ohlc);
 
-    // get options data and make lookup table
-    const chain = await this.client.option_chain(
-      symbol, "", "", firstDateString, lastDateString, ""
+    // do i need to bind this lambda first?
+    chart.subscribeClick((e) => {
+      if (e.point) {
+        // convert (x, y) to (date, price)
+        const price = series.coordinateToPrice(e.point.y);
+        const time_obj = chart.timeScale().coordinateToTime(e.point.x);
+        const date = new Date();
+        date.setFullYear(time_obj.year);
+        date.setMonth(time_obj.month - 1);
+        date.setDate(time_obj.day);
+
+        container.get_slice().update(date, price, chain);
+      }
+    });
+
+    return {
+      chart: chart,
+      series: series
+    }
+  }
+
+  async get_chain(symbol, start, end) {
+    const data = await this.client.option_chain(
+      symbol, "", "", start, end, ""
     );
 
-    this.chain = {
+    const chain = {
       expiries: [],
       calls: {},
       puts: {}
     };
 
-    const calls = chain["callExpDateMap"];
-    const puts = chain["putExpDateMap"];
+    const calls = data["callExpDateMap"];
+    const puts = data["putExpDateMap"];
 
-    for (var expiry in calls) {                                                 // puts and calls should have the same expiries
-      const ms = Date.parse(expiry.split(":")[0]);                              // date from "yyyy-mm-dd:dte"
+    // puts and calls should have the same expiries
+    for (var expiry in calls) {
+      // "yyyy-mm-dd:dte"
+      const ms = Date.parse(expiry.split(":")[0]);
 
-      this.chain.expiries.push(ms);
-      this.chain.calls[ms] = { "strike_list": [] };
-      this.chain.puts[ms] = { "strike_list": [] };
+      chain.expiries.push(ms);
+      chain.calls[ms] = { "strike_list": [] };
+      chain.puts[ms] = { "strike_list": [] };
 
       // populate strikes for this contract (expiry)
       // assumes there is a put and call for every strike
       const call_strikes = calls[expiry];
       const put_strikes = puts[expiry];
 
-      const calls_ = this.chain.calls[ms];
-      const puts_ = this.chain.puts[ms];
+      const calls_ = chain.calls[ms];
+      const puts_ = chain.puts[ms];
 
       for (var strike in call_strikes) {
         const call_data = call_strikes[strike];
@@ -103,144 +136,142 @@ class options_chart {
         calls_[price] = {
           volatility: call_data[0].volatility,
           dte: call_data[0].daysToExpiration,
-          expiration_type: call_data[0].expirationType
+          expiration_type: call_data[0].expirationType,
+          theoretical_value: call_data[0].theoreticalOptionValue
         };
 
         puts_[price] = {
           volatility: put_data[0].volatility,
           dte: put_data[0].daysToExpiration,
-          expiration_type: put_data[0].expirationType
+          expiration_type: put_data[0].expirationType,
+          theoretical_value: put_data[0].theoreticalOptionValue
         };
       }
     }
 
-    // set volatility and rate defaults
-    const rate = chain["interestRate"];
-    const volatility = chain["volatility"];
+    return {
+      chain: chain,
+      volatility: data["volatility"],
+      rate: data["interestRate"]
+    };
+  }
 
+  // should be per container? are these even used?
+  set_defaults(volatility, rate) {
     this.volatility = volatility;
     this.rate = rate;
 
     document.getElementById("options_chart_volatility").value = volatility;
     document.getElementById("options_chart_rate").value = rate;
-
-    console.log(JSON.stringify(this.chain),null,2);
   }
 
-  b_search(val, arr) {
-    var i = 0;
-    var j = arr.length - 1;
-    var m = -1;
+  async add_container() {
+    // init container
+    const symbol = document.getElementById("options_chart_symbol").value;
+    const id = guid();
+    const container = new options_chart_container(id);
 
-    while(i < j) {
-      m = Math.floor((i + j) / 2);
+    // the order is important, the dependencies are annoying...
+    const res_ohlc = await this.get_ohlc(symbol);
+    const res_chain = await this.get_chain(
+                                            symbol,
+                                            res_ohlc.start,
+                                            res_ohlc.end
+                                          );
+    const res_chart = this.get_chart(
+                                      symbol,
+                                      container.get_canvas(),
+                                      res_ohlc.ohlc,
+                                      res_chain.chain,
+                                      container
+                                    );
 
-      if (val > arr[m]) {
-        i = m + 1;
-      } else if (val < arr[m]) {
-        j = m - 1;
-      } else if (val == arr[m]) {
-        break;
-      }
-    }
+    // container properties
+    const props = {};
+    props.ref = container;
+    props.series = res_chart.series;
+    props.chart = res_chart.chart;
+    props.chain = res_chain.chain;
+    props.index = this.grid_index;
 
-    return m;
+    // add container to grid
+    this.containers[id] = props;
+    this.append_to_grid(container.get_body());
+
+    // set global volatility and interest rate -- probably wrong
+    this.set_defaults(res_chain.volatility, res_chain.rate);
   }
 
-  clamp(mid, arr, range) {
-    mid = mid < 0 ? 0 : mid;
-    mid = mid > arr.length - 1 ? arr.length - 1 : mid;
+  remove_container(id) {
+    const index = this.containers[id].index;
+    const body = this.containers[id].reference.get_body();
+    document.getElementById("options_chain_view").remove(body);
+    delete this.containers[id];
+  }
 
-    const half = math.floor(range / 2);
-    const start = mid - half < 0 ? 0 : mid - half;
-    const end = mid + half > arr.length - 1 ? arr.length - 1 : mid + half;
-
+  grid_coord(index) {
     return {
-      start: start,
-      end: end
-    };
-  };
-
-  // retrieve nearest contracts
-  lookup(date, price) {
-    const results = {
-      expiries: [],
-      calls: {},
-      puts: {}
-    };
-
-    // find expiries near date
-    const ms = Date.parse(date);
-    const mid_date = this.b_search(ms, this.chain.expiries);
-    const date_range =
-      this.clamp(mid_date, this.chain.expiries, this.expiry_range);
-
-    for (var i = date_range.start; i <= date_range.end; i++)
-      results.expiries.push(this.chain.expiries[i]);
-
-    // find strikes near price
-    results.expiries.forEach((expiry) => {
-      const calls = this.chain.calls[expiry];
-      const puts = this.chain.puts[expiry];
-      const mid_price = this.b_search(price, calls.strike_list);
-      const price_range =
-        this.clamp(mid_price, calls.strike_list, this.strike_range);
-
-      for (var i = price_range.start; i <= price_range.end; i++) {
-        const strike = calls.strike_list[i];
-        // shallow copy
-        // assumes that for every strike there is a put and a call
-        results.calls[expiry][strike] = this.chain[expiry][strike];
-        results.puts[expiry][strike] = this.chain[expiry][strike];
-      }
-    });
-
-    return results;
-  }
-
-  menu(evt) {
-    if (evt.point) {
-      const price = this.series.coordinateToPrice(evt.point.y);
-      const date = this.chart.timeScale().coordinateToTime(evt.point.x);
-      console.log(
-        `(${evt.point.x},${evt.point.y})`,
-        `(${date},${price})`
-      );
-      const contracts = this.lookup(date, price);
-      console.log(JSON.stringify(contracts, null, 2));
+      row: parseInt(index / this.grid_width),
+      col: parseInt(index % this.grid_width)
     }
   }
 
-  update(evt) {
-    // console.log(JSON.stringify(evt,null,2));
+  append_to_grid(body) {
+    const coords = this.grid_coord(this.grid_index);
+    const row = coords.row;
+    const col = coords.col;
+
+    if (row >= this.grid.rows.length)
+      this.grid.insertRow(row);
+    if (col >= this.grid.rows[row].cells.length)
+      this.grid.rows[row].insertCell(col);
+
+    this.grid.rows[row].cells[col].appendChild(body);
+    this.grid_index++;
+  }
+
+  remove_from_grid(index) {
+    var last = this.grid_coord(index);
+
+    this.grid.rows[last[row]].cells[last[col]].removeChild(0);
+
+    // shift containers to fill vacancy
+    for (var i = index + 1; i <= this.grid_index; i++) {
+      var next = this.grid_coord(i);
+      var container = this.grid.rows[next[row]].cells[next[col]].children[0];
+      this.grid.rows[next[row]].cells[next[col]].removeChild(0);
+      this.grid.rows[last[row]].cells[last[col]].appendChild(container);
+      last = next;
+    }
+
+    this.grid_index--;
   }
 
   constructor(client) {
+    // controls
     this.symbol = undefined;
     this.volatility = undefined;
     this.rate = undefined;
-    this.strikes = undefined;
-    this.strike_range = 3;
-    this.expiry_range = 3;
-    this.weeklies = undefined;
-    this.chain = undefined;
-    this.contracts = {};
+    this.weeklies = undefined;    // true to display
+
+    // api settings
+    this.chain = undefined;       // see options_chain_schema
     this.client = client;
-    this.series = undefined;
-    this.range = 10;                                                            // years of daily OHLC data to load
-    this.lookahead = 365;                                                       // future days to simulate
-    this.chart = window.LightweightCharts.createChart(
-      document.getElementById("options_chart_view"),
-      {
-        width: 800,
-        height: 400,
-        crosshair: {
-          mode: 0
-        }
-      }
-    );
-    this.chart.subscribeClick(this.menu.bind(this));
-    this.chart.subscribeCrosshairMove(this.update.bind(this));
+
+    // per container properties
+    this.containers = {};
+
+    // chart settings
+    this.range = 10;              // years of daily OHLC data to load
+    this.lookahead = 365;         // future days to simulate
+    this.chart_width = 600;
+    this.chart_height = 250;
+
+    // grid settings and initialization
+    this.grid_index = 0;
+    this.grid_width = 1;
+    this.grid = document.createElement("table");
+    document.getElementById("options_chart_view").appendChild(this.grid);
   }
 
 }

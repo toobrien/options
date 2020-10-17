@@ -53,4 +53,4 @@ document.getElementById("time_and_sales_remove_contracts_button")
 document.getElementById("market_profile_get_chart_button")
   .addEventListener("click", () => { mp.get_chart_data(); });
 document.getElementById("options_chart_symbol_refresh")
-  .addEventListener("click", () => { chart.refresh(); });
+  .addEventListener("click", () => { chart.add_container(); });

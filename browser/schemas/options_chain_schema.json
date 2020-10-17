@@ -1,25 +1,20 @@
 
 // options_chart
 {
-    "expiry_list": [ Date, ...],
-    "expiries": {
-        Date: {
-            "call_strikes": [ 315.0, ...],
-            "calls": { 
-                "315.0": {
-                    "volatility": 0.0
-                    // can add other things here later
-                }
-            },
-            "put_strikes": [ 315.0, ...],
-            "puts": { 
-                "315.0": {
-                    "volatility": 0.0
-                }
-            }
-        },
-        ...
-    }
+  "expiries": [ Date, ...],
+  "calls": {
+    "Date": {
+      "315.0": {
+        "volatility": 0.0
+        // can add other things here later
+      },
+      ...
+    },
+    ...
+  },
+  "puts": {
+    // same as calls
+  }
 }
 
   // tdameritrade API
