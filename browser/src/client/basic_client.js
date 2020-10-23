@@ -1,4 +1,4 @@
-import { send_request } from "../src/browser_utils.js";
+import { send_request } from "../utils/browser_utils.js";
 
 class basic_client {
 

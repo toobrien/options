@@ -1,4 +1,4 @@
-import { send_request, sleep } from "../src/browser_utils.js";
+import { send_request, sleep } from "../src/utils/browser_utils.js";
 
 class options_chain {
 

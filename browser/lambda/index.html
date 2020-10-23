@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      table {
+        border: 0px;
+      }
+
+      td {
+        padding: 4px;
+      }
+
+      th {
+        font-weight: normal
+      }
+
+      .headings {
+        overflow: hidden;
+      }
+
+      .headings button.active {
+        background-color: #ccc;
+      }
+
+      .content {
+        display: none;
+      }
+
+      td.expiry_label_cell {
+        background-color: #F6A8A6;
+      }
+
+      td.strike_label_cell {
+        background-color: #A5C8E4;
+      }
+
+      table.test,
+      table.test tr,
+      table.test td {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <span title="requires authorization to get data through your TDAmeritrade account">
+      <div>
+        real-time data?
+        <input type="checkbox" id="real_time_data"></input>
+      </div>
+    </span>
+
+    <div class="headings">
+      <button class="link" id="options_chart_tab_button">
+        options chart
+      </button>
+      <button class="link" id="options_chain_tab_button">
+        options chain
+      </button>
+      <button class="link" id="returns_histogram_tab_button">
+        returns histogram
+      </button>
+      <button class="link" id="time_and_sales_tab_button">
+        time and sales
+      </button>
+      <button class="link" id="market_profile_tab_button">
+        market profile
+      </button>
+    </div>
+
+    <div id="options_chart" class="content">
+      <table id="app">
+        <tr id="options_chart_main">
+          <td id="options_chart_controls" valign="top">
+            <table>
+              <tr>
+                <td>symbol</td>
+                <td>
+                  <input type="text" id="options_chart_symbol"></input>
+                </td>
+              </tr>
+              <tr>
+                <td>volatility</td>
+                <td colspan="2">
+                  <input type="text" id="options_chart_volatility"></input>
+                </td>
+              </tr>
+              <tr>
+                <td>risk-free rate</td>
+                <td colspan="2">
+                  <input type="text" id="options_chart_rate"></input>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <select id="options_chart_type">
+                    <option value="puts">puts</option>
+                    <option value="calls">calls</option>
+                    <option value="both">both</option>
+                  </select>
+                </td>
+                <td>
+                  <button id="options_chart_symbol_refresh">add</button>
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td id="options_chart_containers">
+            <div id="options_chart_view"></div>
+          </td>
+        </tr>
+        <tr id="options_chart_description">
+          <td colspan="2"></td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="options_chain" class="content">
+      <table>
+        <tr>
+          <td valign="top" class="control">
+            <textarea cols=20, rows=20 id="opt_contracts"></textarea>
+            <br>
+            <button id="options_chain_refresh_contracts_button">refresh</button>
+          </td>
+          <td valign="top">
+            <div id="chain_view"></div>
+          </td>
+        </tr>
+        <tr>
+          <td><!-- placeholder beneath textarea --></td>
+          <td>
+            <div id="chart_view"></div>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" align="left">
+            <pre>
+              - type one contract per line, with the symbol name, date, put or call, and strike e.g.:
+
+                MELI_011521P1100
+                SPY_121721C330
+
+              then hit refresh
+
+              - during market hours, you can stream bid, ask, theoretical value into a chart
+              - quotes are 15 minutes delayed unless you log in and tick the data box
+            </pre>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="returns_histogram" class="content">
+      enter a stock symbol to see a histogram of daily compounded returns for the year-to-date
+      <table>
+        <tr>
+          <td valign="top" class="control">
+            <input type="text" cols=6 id="histogram_symbol"></input>
+            <button
+              id="returns_histogram_retrieve_histogram_button">update</button>
+          </td>
+          <td>
+            <div id="histogram_view"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="time_and_sales" class="content">
+      <table>
+        <tr>
+          <td valign="top" class="control">
+            symbols<br>
+            <input type="text" id="ts_contracts"></input>
+            <br>
+            <button id="time_and_sales_add_contracts_button">add</button>
+            <button
+              id="time_and_sales_remove_contracts_button">remove</button>
+          </td>
+          <td>
+            <div id="tape_view">
+              <table>
+                <tr id="tape_row"></tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="market_profile" class="content">
+      <table>
+        <tr>
+          <td valign="top" class="control">
+            <table>
+              <tr>
+                <td>symbol</td>
+                <td><input type="text" id="mp_symbol"></input></td>
+              </tr>
+              <tr>
+                <td>calendar days</td>
+                <td>
+                  <input type="text" id="mp_days"></input>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span title="these units are minimum price increments, e.g. cents for equities">
+                    minimum trend
+                  </span>
+                </td>
+                <td>
+                  <select id="mp_minimum_trend">
+                    <option>1</option>
+                    <option>10</option>
+                    <option>100</option>
+                    <option>1000</option>
+                    <option>10000</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <button
+                    id="market_profile_get_chart_button">get chart</button>
+                </td>
+              </tr>
+          </table>
+          </td>
+          <td>
+            <div id="mp_view"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <script src="./bundle.js"></script>
+  </body>
+</html>

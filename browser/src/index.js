@@ -1,5 +1,5 @@
 // real-time data setting
-import { set_real_time_data } from "../src/browser_utils.js";
+import { set_real_time_data } from "../src/utils/browser_utils.js";
 
 const data_checkbox = document.getElementById("real_time_data");
 data_checkbox.checked = false;
@@ -21,15 +21,15 @@ import { load_content } from "../src/tabs.js";
 });
 
 // clients
-import { basic_client } from "../src/basic_client.js";
-import { stream_client } from "../src/stream_client.js";
+import { basic_client } from "../src/client/basic_client.js";
+import { stream_client } from "../src/client/stream_client.js";
 
 const b_client = new basic_client();
 const s_client = new stream_client();
 
 // components
 import { options_chain } from "../src/options_chain.js";
-import { options_chart } from "../src/options_chart.js";
+import { options_chart } from "../src/options_chart/options_chart.js";
 import { returns_histogram } from "../src/returns_histogram.js";
 import { time_and_sales } from "../src/time_and_sales.js";
 import { market_profile } from "../src/market_profile.js";

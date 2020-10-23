@@ -1,9 +1,10 @@
 
 // options_chart
 {
-  "expiries": [ Date, ...],
+  "expiries": [ Date, ... ],
   "calls": {
     "Date": {
+      "strike_list": [ float, ... ]
       "315.0": {
         "volatility": 0.0
         // can add other things here later
@@ -19,6 +20,18 @@
 
   // tdameritrade API
   {
+    "symbol": "SYM",
+    "status": "SUCCESS|FAILURE",
+    "underlying": null,
+    "strategy": "SINGLE",
+    "interval": 0,
+    "isDelayed": true,
+    "isIndex": false,
+    "interestRate": 0.0,
+    "underlyingPrice": 0.0,
+    "volatility:" 0,
+    "daysToExpiration": 0,
+    "numberOfContracts": 0,
     "[put|call]ExpDateMap": {
       "yyyy-mm-dd:dte": {
         "0.0": [

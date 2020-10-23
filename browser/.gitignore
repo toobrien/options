@@ -1,0 +1,4 @@
+dist
+schemas
+deploy.sh
+lambda/bundle.js

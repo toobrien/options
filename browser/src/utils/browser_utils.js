@@ -148,8 +148,42 @@ function guid() {
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
 }
 
+function b_search(val, arr) {
+  var i = 0;
+  var j = arr.length - 1;
+  var m = -1;
+
+  while(i < j) {
+    m = parseInt((i + j) / 2);
+
+    if (val > arr[m]) {
+      i = m + 1;
+    } else if (val < arr[m]) {
+      j = m - 1;
+    } else if (val == arr[m]) {
+      break;
+    }
+  }
+
+  return m;
+}
+
+function clamp(mid, arr, range) {
+  mid = mid < 0 ? 0 : mid;
+  mid = mid > arr.length - 1 ? arr.length - 1 : mid;
+
+  const half = parseInt(range / 2);
+  const start = mid - half < 0 ? 0 : mid - half;
+  const end = mid + half > arr.length - 1 ? arr.length - 1 : mid + half;
+
+  return {
+    start: start,
+    end: end
+  };
+};
+
 export {
   sleep, send_request, set_real_time_data,
   build_query_string, register_data_listener,
-  look_back_range, guid
+  look_back_range, guid, b_search, clamp
 };

@@ -1,4 +1,4 @@
-import { register_data_listener } from "../src/browser_utils.js";
+import { register_data_listener } from "../src/utils/browser_utils.js";
 
 class time_and_sales {
 
@@ -32,7 +32,7 @@ class time_and_sales {
     new_contracts.forEach(async (contract) => {
       if (!(contract in this.contracts)) {                                      // this test fails for some reason
 
-        if (!(await this.client.time_and_sales(new_contracts))) {                  // subscribe to time and sales api
+        if (!(await this.client.time_and_sales(new_contracts))) {               // subscribe to time and sales api
           return;
         }
 
@@ -84,9 +84,7 @@ class time_and_sales {
       for (var contract in this.contracts)
         this.remove(contract);
       document.getElementById("tape_row").innerHTML =
-        `this tool requires real-time data.
-         please log-in first tick the real-time data box first. if you un-tick
-         the box, you may have to reload and log in again.`;
+        `this tool is incomplete. if you would like to use it, please log-in and tick the real-time data box first.`;
     } else
       document.getElementById("tape_row").innerHTML = "";
 

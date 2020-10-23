@@ -2,7 +2,7 @@ import {
   send_request, sleep, build_query_string,
   register_data_listener
 }
-  from "../src/browser_utils.js";
+  from "../utils/browser_utils.js";
 
 class stream_client {
 

@@ -1,13 +1,22 @@
-import { createChart } from "../src/lightweight-charts.js";
-import { look_back_range, guid } from "../src/browser_utils.js"
-import { options_chart_container } from "../src/options_chart_container.js";
+import { createChart } from "../lightweight-charts.js";
+import { look_back_range, guid } from "../utils/browser_utils.js"
+import { container } from "../options_chart/container.js";
+import { chain } from "../options_chart/chain.js";
 
 class options_chart {
 
   async get_ohlc(symbol) {
+    const range = look_back_range(this.look_behind);
     const candles = await this.client.price_history(
-      symbol, "year", this.range, "daily", "1", undefined, undefined, false
-    );
+                                                    symbol,
+                                                    "year",                     // period type
+                                                    undefined,                  // # periods
+                                                    "daily",                    // candle type
+                                                    1,                          // days per candle
+                                                    range.start.getTime(),      // start
+                                                    range.end.getTime(),        // end
+                                                    false
+                                                  );
 
     // format: { time: ISOString, price: float }
     const ohlc = [];
@@ -32,7 +41,7 @@ class options_chart {
     const start_str = ohlc[ohlc.length - 1].time;
     const start = Date.parse(start_str);
 
-    for (var i = 1; i < this.lookahead; i++) {
+    for (var i = 1; i < this.look_ahead; i++) {
       const next = new Date(start);
       next.setDate(next.getDate() + i);
       ohlc.push({ time: next.toISOString() });
@@ -98,59 +107,10 @@ class options_chart {
       symbol, "", "", start, end, ""
     );
 
-    const chain = {
-      expiries: [],
-      calls: {},
-      puts: {}
-    };
-
-    const calls = data["callExpDateMap"];
-    const puts = data["putExpDateMap"];
-
-    // puts and calls should have the same expiries
-    for (var expiry in calls) {
-      // "yyyy-mm-dd:dte"
-      const ms = Date.parse(expiry.split(":")[0]);
-
-      chain.expiries.push(ms);
-      chain.calls[ms] = { "strike_list": [] };
-      chain.puts[ms] = { "strike_list": [] };
-
-      // populate strikes for this contract (expiry)
-      // assumes there is a put and call for every strike
-      const call_strikes = calls[expiry];
-      const put_strikes = puts[expiry];
-
-      const calls_ = chain.calls[ms];
-      const puts_ = chain.puts[ms];
-
-      for (var strike in call_strikes) {
-        const call_data = call_strikes[strike];
-        const put_data = put_strikes[strike];
-
-        const price = parseFloat(strike);
-
-        calls_.strike_list.push(price);
-        puts_.strike_list.push(price);
-
-        calls_[price] = {
-          volatility: call_data[0].volatility,
-          dte: call_data[0].daysToExpiration,
-          expiration_type: call_data[0].expirationType,
-          theoretical_value: call_data[0].theoreticalOptionValue
-        };
-
-        puts_[price] = {
-          volatility: put_data[0].volatility,
-          dte: put_data[0].daysToExpiration,
-          expiration_type: put_data[0].expirationType,
-          theoretical_value: put_data[0].theoreticalOptionValue
-        };
-      }
-    }
+    const instance = new chain(data);
 
     return {
-      chain: chain,
+      chain: instance,
       volatility: data["volatility"],
       rate: data["interestRate"]
     };
@@ -169,7 +129,7 @@ class options_chart {
     // init container
     const symbol = document.getElementById("options_chart_symbol").value;
     const id = guid();
-    const container = new options_chart_container(id);
+    const c = new container(id);
 
     // the order is important, the dependencies are annoying...
     const res_ohlc = await this.get_ohlc(symbol);
@@ -180,15 +140,15 @@ class options_chart {
                                           );
     const res_chart = this.get_chart(
                                       symbol,
-                                      container.get_canvas(),
+                                      c.get_canvas(),
                                       res_ohlc.ohlc,
                                       res_chain.chain,
-                                      container
+                                      c
                                     );
 
     // container properties
     const props = {};
-    props.ref = container;
+    props.ref = c;
     props.series = res_chart.series;
     props.chart = res_chart.chart;
     props.chain = res_chain.chain;
@@ -196,7 +156,7 @@ class options_chart {
 
     // add container to grid
     this.containers[id] = props;
-    this.append_to_grid(container.get_body());
+    this.append_to_grid(c.get_body());
 
     // set global volatility and interest rate -- probably wrong
     this.set_defaults(res_chain.volatility, res_chain.rate);
@@ -252,18 +212,17 @@ class options_chart {
     this.symbol = undefined;
     this.volatility = undefined;
     this.rate = undefined;
-    this.weeklies = undefined;    // true to display
 
     // api settings
-    this.chain = undefined;       // see options_chain_schema
+    this.chain = undefined;                     // see options_chain_schema
     this.client = client;
 
     // per container properties
     this.containers = {};
 
     // chart settings
-    this.range = 10;              // years of daily OHLC data to load
-    this.lookahead = 365;         // future days to simulate
+    this.look_behind = 10 * 365;                // days of OHLC per chart
+    this.look_ahead = 3 * 365;                  // blank days appended
     this.chart_width = 600;
     this.chart_height = 250;
 
