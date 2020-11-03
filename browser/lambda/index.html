@@ -26,30 +26,27 @@
         display: none;
       }
 
-      td.expiry_label_cell {
-        background-color: #F6A8A6;
-      }
-
-      td.strike_label_cell {
+      td.active_contract {
         background-color: #A5C8E4;
       }
 
       table.test,
       table.test tr,
       table.test td {
+        border-collapse: collapse;
         border: 1px solid black;
+      }
+
+      .expiration {
+        position: absolute;
+        z-index: 8;
+        border-left: 1px solid blue;
+        height: 324px;
       }
     </style>
   </head>
-
   <body>
-    <span title="requires authorization to get data through your TDAmeritrade account">
-      <div>
-        real-time data?
-        <input type="checkbox" id="real_time_data"></input>
-      </div>
-    </span>
-
+    <!-- HEADINGS -->
     <div class="headings">
       <button class="link" id="options_chart_tab_button">
         options chart
@@ -68,6 +65,7 @@
       </button>
     </div>
 
+    <!-- OPTIONS CHART -->
     <div id="options_chart" class="content">
       <table id="app">
         <tr id="options_chart_main">
@@ -80,7 +78,7 @@
                 </td>
               </tr>
               <tr>
-                <td>volatility</td>
+                <td>default volatility</td>
                 <td colspan="2">
                   <input type="text" id="options_chart_volatility"></input>
                 </td>
@@ -96,11 +94,11 @@
                   <select id="options_chart_type">
                     <option value="puts">puts</option>
                     <option value="calls">calls</option>
-                    <option value="both">both</option>
+                    <!--<option value="both">both</option>-->
                   </select>
                 </td>
                 <td>
-                  <button id="options_chart_symbol_refresh">add</button>
+                  <button id="options_chart_add">add</button>
                 </td>
               </tr>
             </table>
@@ -115,6 +113,7 @@
       </table>
     </div>
 
+    <!-- OPTIONS CHAIN -->
     <div id="options_chain" class="content">
       <table>
         <tr>
@@ -151,8 +150,8 @@
       </table>
     </div>
 
+    <!-- RETURNS HISTOGRAM -->
     <div id="returns_histogram" class="content">
-      enter a stock symbol to see a histogram of daily compounded returns for the year-to-date
       <table>
         <tr>
           <td valign="top" class="control">
@@ -161,12 +160,39 @@
               id="returns_histogram_retrieve_histogram_button">update</button>
           </td>
           <td>
-            <div id="histogram_view"></div>
+            <table>
+              <tr>
+                <td rowspan="3">
+                  <div id="returns_histogram_view"></div>
+                </td>
+              </tr>
+              <td valign="top">
+                <table id="returns_histogram_data" style="display: none;">
+                  <tr>
+                    <td>mean:</td>
+                    <td id="returns_histogram_mean"></td>
+                  </tr>
+                  <tr>
+                    <td>standard deviation:</td>
+                    <td id="returns_histogram_stdev"></td>
+                  </tr>
+                  <tr>
+                    <td>p-value:</td>
+                    <td id="returns_histogram_pv"></td>
+                  </tr>
+                </table>
+              </td>
+            </table>
           </td>
         </tr>
       </table>
+      <pre>
+        - enter a stock symbol to see a histogram of daily compounded returns for the year-to-date
+        - click on the chart to get a p-value
+      </pre>
     </div>
 
+    <!-- TIME AND SALES -->
     <div id="time_and_sales" class="content">
       <table>
         <tr>
@@ -189,6 +215,7 @@
       </table>
     </div>
 
+    <!-- MARKET PROFILE -->
     <div id="market_profile" class="content">
       <table>
         <tr>
@@ -235,6 +262,19 @@
       </table>
     </div>
 
+    <!-- LOGIN -->
+    <span title="requires authorization to get data through your TDAmeritrade account">
+      <div>
+        real-time data?
+        <input type="checkbox" id="real_time_data"></input>
+      </div>
+    </span>
+    <!-- CREDIT -->
+    <p>
+      charts by <a href="https://www.tradingview.com/lightweight-charts/">tradingview</a>
+    </p>
+
+    <!-- CODE -->
     <script src="./bundle.js"></script>
   </body>
 </html>

@@ -39,6 +39,7 @@ class options_chart {
 
     // add whitespace for future prices: { time: ISOString }
     const start_str = ohlc[ohlc.length - 1].time;
+    const start_price = ohlc[ohlc.length - 1].close;
     const start = Date.parse(start_str);
 
     for (var i = 1; i < this.look_ahead; i++) {
@@ -52,14 +53,15 @@ class options_chart {
     // start and end are used in subsequent options chain api call
     return {
       ohlc: ohlc,
-      start: start_str,
-      end: end_str
+      start_date: start_str,
+      start_price: start_price,
+      end_date: end_str
     };
   }
 
-  get_chart(symbol, canvas, ohlc, chain, container) {
+  get_chart(symbol, ohlc, chain, container) {
     const chart = window.LightweightCharts.createChart(
-      canvas,
+      container.get_canvas(),
       {
         width: this.chart_width,
         height: this.chart_height,
@@ -81,25 +83,24 @@ class options_chart {
     const series = chart.addCandlestickSeries();
     series.setData(ohlc);
 
-    // do i need to bind this lambda first?
-    chart.subscribeClick((e) => {
-      if (e.point) {
-        // convert (x, y) to (date, price)
-        const price = series.coordinateToPrice(e.point.y);
-        const time_obj = chart.timeScale().coordinateToTime(e.point.x);
-        const date = new Date();
-        date.setFullYear(time_obj.year);
-        date.setMonth(time_obj.month - 1);
-        date.setDate(time_obj.day);
-
-        container.get_slice().update(date, price, chain);
-      }
-    });
-
     return {
       chart: chart,
       series: series
-    }
+    };
+  }
+
+  // convert y to price, x to date
+  convert_coords(chart, series, e) {
+    const price = series.coordinateToPrice(e.point.y);
+    const time_obj = chart.timeScale().coordinateToTime(e.point.x);
+    const date = new Date();
+    date.setFullYear(time_obj.year);
+    date.setMonth(time_obj.month - 1);
+    date.setDate(time_obj.day);
+    return {
+      price: price,
+      date: date
+    };
   }
 
   async get_chain(symbol, start, end) {
@@ -116,96 +117,104 @@ class options_chart {
     };
   }
 
-  // should be per container? are these even used?
-  set_defaults(volatility, rate) {
-    this.volatility = volatility;
-    this.rate = rate;
-
-    document.getElementById("options_chart_volatility").value = volatility;
-    document.getElementById("options_chart_rate").value = rate;
-  }
-
   async add_container() {
     // init container
     const symbol = document.getElementById("options_chart_symbol").value;
-    const id = guid();
-    const c = new container(id);
+    const c = new container(this);
+    const id = c.get_id();
 
     // the order is important, the dependencies are annoying...
     const res_ohlc = await this.get_ohlc(symbol);
     const res_chain = await this.get_chain(
                                             symbol,
-                                            res_ohlc.start,
-                                            res_ohlc.end
+                                            res_ohlc.start_date,
+                                            res_ohlc.end_date
                                           );
-    const res_chart = this.get_chart(
-                                      symbol,
-                                      c.get_canvas(),
-                                      res_ohlc.ohlc,
-                                      res_chain.chain,
-                                      c
-                                    );
+    const res_chart = this.get_chart(symbol, res_ohlc.ohlc, res_chain.chain, c);
 
     // container properties
     const props = {};
     props.ref = c;
-    props.series = res_chart.series;
-    props.chart = res_chart.chart;
+
+    props.chart = {};
+    props.chart.ref = res_chart.chart;
+    props.chart.price_series = res_chart.series;
+    props.chart.start_date = res_ohlc.start_date;
+    props.chart.end_date = res_ohlc.end_date;
+    props.chart.start_price = res_ohlc.start_price;
+    props.active_contract = undefined;
+    props.chart.stdev_series_up = undefined;
+    props.chart.stdev_series_down = undefined;
+    props.chart.expirations = [];
+
+    res_chain.chain.get_expiries().get_list().forEach((expiry) => {
+      const expiration = document.createElement("div");
+      expiration.className = "expiration";
+      props.chart.expirations.push({
+        ref: expiration,
+        time: new Date(expiry).toISOString()
+      });
+    });
+
+    props.chart.ref.subscribeClick((e) => {
+      if (e.point && e.time) {
+        const converted = this.convert_coords(
+                              props.chart.ref, props.chart.price_series, e
+                          );
+        c.get_slice().update(converted.date, converted.price, res_chain.chain);
+      }
+    });
+
+    props.chart.ref.subscribeCrosshairMove((e) => {
+      if (e.point && e.time) {
+        const converted = this.convert_coords(
+                                props.chart.ref, props.chart.price_series, e
+                          );
+        c.get_strategy().update(converted.date, converted.price);
+      }
+    });
+
+    const draw_expiries = (ts) => {
+      if (props.chart.active_contract != undefined)
+        props.chart.expirations.forEach((expiration) => {
+          expiration.ref.style.left = `${
+                                          props.chart.ref.timeScale().
+                                          timeToCoordinate(expiration.time)
+                                      }px`;
+        });
+      window.requestAnimationFrame(draw_expiries);
+    };
+
+    window.requestAnimationFrame(draw_expiries);
+
     props.chain = res_chain.chain;
     props.index = this.grid_index;
 
     // add container to grid
     this.containers[id] = props;
-    this.append_to_grid(c.get_body());
+    this.view_list.appendChild(c.get_body());
 
-    // set global volatility and interest rate -- probably wrong
-    this.set_defaults(res_chain.volatility, res_chain.rate);
+    // just set default rate, default vol will come from contract
+    // user can override by typing in their own vol
+    document.getElementById("options_chart_rate").value = res_chain.rate;
   }
 
   remove_container(id) {
-    const index = this.containers[id].index;
-    const body = this.containers[id].reference.get_body();
-    document.getElementById("options_chain_view").remove(body);
+    this.containers[id].ref.get_body().remove();
     delete this.containers[id];
   }
 
-  grid_coord(index) {
-    return {
-      row: parseInt(index / this.grid_width),
-      col: parseInt(index % this.grid_width)
+  get_container(id) { return this.containers[id]; }
+
+  // called when user updates default rate or vol
+  refresh_defaults() {
+    for (const [k, v] of Object.entries(this.containers())) {
+        v.chain.refresh_defaults();
+        v.ref.refresh();
     }
   }
 
-  append_to_grid(body) {
-    const coords = this.grid_coord(this.grid_index);
-    const row = coords.row;
-    const col = coords.col;
-
-    if (row >= this.grid.rows.length)
-      this.grid.insertRow(row);
-    if (col >= this.grid.rows[row].cells.length)
-      this.grid.rows[row].insertCell(col);
-
-    this.grid.rows[row].cells[col].appendChild(body);
-    this.grid_index++;
-  }
-
-  remove_from_grid(index) {
-    var last = this.grid_coord(index);
-
-    this.grid.rows[last[row]].cells[last[col]].removeChild(0);
-
-    // shift containers to fill vacancy
-    for (var i = index + 1; i <= this.grid_index; i++) {
-      var next = this.grid_coord(i);
-      var container = this.grid.rows[next[row]].cells[next[col]].children[0];
-      this.grid.rows[next[row]].cells[next[col]].removeChild(0);
-      this.grid.rows[last[row]].cells[last[col]].appendChild(container);
-      last = next;
-    }
-
-    this.grid_index--;
-  }
+  get_look_behind() { return this.look_behind; }
 
   constructor(client) {
     // controls
@@ -223,14 +232,12 @@ class options_chart {
     // chart settings
     this.look_behind = 10 * 365;                // days of OHLC per chart
     this.look_ahead = 3 * 365;                  // blank days appended
-    this.chart_width = 600;
-    this.chart_height = 250;
+    this.chart_width = 700;
+    this.chart_height = 350;
 
-    // grid settings and initialization
-    this.grid_index = 0;
-    this.grid_width = 1;
-    this.grid = document.createElement("table");
-    document.getElementById("options_chart_view").appendChild(this.grid);
+    // view initialization
+    this.view_list = document.createElement("table");
+    document.getElementById("options_chart_view").appendChild(this.view_list);
   }
 
 }

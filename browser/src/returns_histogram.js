@@ -3,24 +3,31 @@ import { createChart } from "../src/lightweight-charts.js";
 class returns_histogram {
 
   async retrieve_histogram() {
-    const current_symbol =
-      document.getElementById("histogram_symbol").value.toUpperCase();
+    if (this.chart != undefined) {
+      this.chart.remove();
+      this.data.style.display = "none";
+    }
+
+    const symbol = document.getElementById("histogram_symbol")
+                           .value.toUpperCase();
 
     this.update_histogram(
-      current_symbol,
-      await this.client.price_history(
-        current_symbol,"ytd",1,"daily","1","","",false
-      )
+      symbol,
+      await this.client.price_history(symbol,"ytd",1,"daily","1","","",false)
     )
   }
 
   update_histogram(symbol, response) {
     // histogram buckets are 1 percentage point, centered around 0.
-    const range = 50;
-    const min_bucket = -range / 2;
+    const min_bucket = -this.range / 2;
     const buckets = [];
-    for (var i = 0; i <= range; i++)
-      buckets[i] = { time: min_bucket + i, value: 0 };
+
+    for (var i = 0; i <= this.range; i++)
+      buckets[i] = {
+                    time: min_bucket + i,
+                    value: 0,
+                    color: this.default_color
+                   };
 
     // calculate returns
     const candles = response["candles"];
@@ -39,6 +46,18 @@ class returns_histogram {
 
     returns.sort((a,b) => { return a - b; });
 
+    const mean = returns.reduce((s, v) => s += v, 0) / returns.length;
+    const stdev = Math.sqrt(
+                        returns.reduce(
+                          (s, v) => s += (v - mean)**2
+                        ) / returns.length
+                      );
+
+    document.getElementById("returns_histogram_mean")
+            .innerHTML = mean.toFixed(2);
+    document.getElementById("returns_histogram_stdev")
+            .innerHTML = stdev.toFixed(2);
+
     // populate buckets
     try {
       for (var i = 0, j = 0, k = min_bucket; i < returns.length; i++) {
@@ -56,8 +75,8 @@ class returns_histogram {
     }
 
     // explanation of options: https://github.com/tradingview/lightweight-charts/blob/master/docs/customization.md
-    const chart = window.LightweightCharts.createChart(
-              document.getElementById("histogram_view"),
+    this.chart = window.LightweightCharts.createChart(
+              document.getElementById("returns_histogram_view"),
               {
                 width: 400,
                 height: 300,
@@ -90,13 +109,43 @@ class returns_histogram {
               }
             );
 
-    const returns_series = chart.addHistogramSeries();
+    const returns_series = this.chart.addHistogramSeries();
     returns_series.setData(buckets);
 
+    this.chart.subscribeClick((e) => {
+      if (e.time) {
+        const lim = parseInt(e.time + this.range / 2);
+        var count = 0;
+        var i = 0;
+
+        for (; i <= lim; i++) {
+          count += buckets[i].value;
+          buckets[i].color = this.highlight_color;
+        }
+
+        for (; i < buckets.length; i++)
+          buckets[i].color = this.default_color;
+
+        document.getElementById("returns_histogram_pv")
+                .innerHTML = (1 - count / returns.length).toFixed(2);
+      } else {
+        for (var i = 0; i < this.range; i++)
+          buckets[i].color = this.default_color;
+      }
+
+      returns_series.setData(buckets);
+    });
+
+    this.data.style.display = "block";
   }
 
   constructor(client) {
+    this.chart = undefined;
+    this.data = document.getElementById("returns_histogram_data");
     this.client = client;
+    this.range = 60;
+    this.default_color = "#00CC00";
+    this.highlight_color = "#CC0000";
   }
 
 }

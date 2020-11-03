@@ -36,6 +36,7 @@ class index {
     return item in index;
   }
 
+  get_list() { return this.list; }
 
 }
 

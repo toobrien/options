@@ -52,5 +52,5 @@ document.getElementById("time_and_sales_remove_contracts_button")
   .addEventListener("click", () => { tape.remove_contracts(); });
 document.getElementById("market_profile_get_chart_button")
   .addEventListener("click", () => { mp.get_chart_data(); });
-document.getElementById("options_chart_symbol_refresh")
+document.getElementById("options_chart_add")
   .addEventListener("click", () => { chart.add_container(); });
