@@ -61,6 +61,9 @@ async function set_tokens() {
       const body = await res.json();
       refresh_token = body["refresh_token"];
       access_token = body["access_token"];
+
+      // refresh access token in 29 minutes (it expires in 30)
+      setTimeout(() => { access_token = undefined }, 1740000);
     }
   }
 

@@ -255,7 +255,8 @@ class strategy {
   }
 
   add_expirations(chart) {
-    const root = document.querySelector(".tv-lightweight-charts");
+    const root = this.container
+                     .get_body().querySelector(".tv-lightweight-charts");
     const viewport = root.querySelector(
                       "tr:nth-child(1) td:nth-child(2) > div"
                     );

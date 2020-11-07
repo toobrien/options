@@ -21,6 +21,9 @@ class time_and_sales {
         tape.rows[2].insertCell(0).innerHTML = tick["1"].toLocaleTimeString();
         tape.rows[2].insertCell(1).innerHTML = tick["2"];
         tape.rows[2].insertCell(3).innerHTML = tick["3"];
+
+        if (tape.rows.length == this.max_length)
+          tape.deleteRow(this.max_length - 1);
       }
     });
   }
@@ -93,6 +96,7 @@ class time_and_sales {
   constructor(client) {
     this.contracts = {}
     this.client = client;
+    this.max_length = 50;
     register_data_listener(this.reset.bind(this));
     this.reset(false);
     client.register("time_and_sales", this.tick.bind(this));
