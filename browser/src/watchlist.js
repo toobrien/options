@@ -159,3 +159,5 @@ class watchlist {
     constructor() {
     }
 }
+
+export { watchlist };

@@ -2,6 +2,7 @@ const fs = require("fs");
 
 const index = fs.readFileSync("./index.html");
 const bundle = fs.readFileSync("./bundle.js");
+const rwalk = fs.readFileSync("./rwalk.ipynb");
 
 const routes = {
   "/": {
@@ -15,6 +16,10 @@ const routes = {
   "/bundle.js": {
     "data": bundle,
     "content-type": "text/javascript"
+  },
+  "/notebooks/rwalk.ipynb": {
+    "data": rwalk,
+    "content-type": "application/octet-stream"
   },
   "404": {
     "data": "404",

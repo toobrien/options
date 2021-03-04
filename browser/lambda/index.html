@@ -47,232 +47,404 @@
   </head>
   <body>
     <!-- HEADINGS -->
-    <div class="headings">
-      <button class="link" id="options_chart_tab_button">
-        options chart
-      </button>
-      <button class="link" id="options_chain_tab_button">
-        options chain
-      </button>
-      <button class="link" id="returns_histogram_tab_button">
-        returns histogram
-      </button>
-      <button class="link" id="time_and_sales_tab_button">
-        time and sales
-      </button>
-      <button class="link" id="market_profile_tab_button">
-        market profile
-      </button>
-    </div>
+    <table>
+      <tr>
+        <td valign="top">
+          <div class="headings">
+            <button class="link" id="watchlist">
+              watchlist
+            </button>
+            <button class="link" id="options_chart_tab_button">
+              options chart
+            </button>
+            <!--
+            <button class="link" id="options_chain_tab_button">
+              options chain
+            </button>
+            -->
+            <button class="link" id="returns_histogram_tab_button">
+              returns histogram
+            </button>
+            <!--
+            <button class="link" id="time_and_sales_tab_button">
+              time and sales
+            </button>
+            -->
+            <button class="link" id="market_profile_tab_button">
+              market profile
+            </button>
+            <button class="link" id="normalized_tab_button">
+              normalized chart
+            </button>
+            <button class="link" id="volatility_tab_button">
+              volatility
+            </button>
+            <!--
+            <button class="link" id="notebooks_tab_button">
+              notebooks
+            </button>
+            -->
+            <button class="link" id="cot_api_tab_button">
+              cot api
+            </button>
+          </div>
 
-    <!-- OPTIONS CHART -->
-    <div id="options_chart" class="content">
-      <table id="app">
-        <tr id="options_chart_main">
-          <td id="options_chart_controls" valign="top">
+          <!-- OPTIONS CHART -->
+          <div id="options_chart" class="content">
+            <table id="app">
+              <tr id="options_chart_main">
+                <td id="options_chart_controls" valign="top">
+                  <table>
+                    <tr>
+                      <td>symbol</td>
+                      <td>
+                        <input type="text" id="options_chart_symbol"></input>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>default volatility</td>
+                      <td colspan="2">
+                        <input type="text" id="options_chart_volatility"></input>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>risk-free rate</td>
+                      <td colspan="2">
+                        <input type="text" id="options_chart_rate"></input>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <select id="options_chart_type">
+                          <option value="puts">puts</option>
+                          <option value="calls">calls</option>
+                          <!--<option value="both">both</option>-->
+                        </select>
+                      </td>
+                      <td>
+                        <button id="options_chart_add">add</button>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td id="options_chart_containers">
+                  <div id="options_chart_view"></div>
+                </td>
+              </tr>
+              <tr id="options_chart_description">
+                <td colspan="2"></td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- OPTIONS CHAIN -->
+          <!--
+          <div id="options_chain" class="content">
             <table>
               <tr>
-                <td>symbol</td>
-                <td>
-                  <input type="text" id="options_chart_symbol"></input>
+                <td valign="top" class="control">
+                  <textarea cols=20, rows=20 id="opt_contracts"></textarea>
+                  <br>
+                  <button id="options_chain_refresh_contracts_button">refresh</button>
+                </td>
+                <td valign="top">
+                  <div id="chain_view"></div>
                 </td>
               </tr>
               <tr>
-                <td>default volatility</td>
-                <td colspan="2">
-                  <input type="text" id="options_chart_volatility"></input>
+                <td></td>
+                <td>
+                  <div id="chart_view"></div>
                 </td>
               </tr>
               <tr>
-                <td>risk-free rate</td>
-                <td colspan="2">
-                  <input type="text" id="options_chart_rate"></input>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <select id="options_chart_type">
-                    <option value="puts">puts</option>
-                    <option value="calls">calls</option>
-                    <!--<option value="both">both</option>-->
-                  </select>
-                </td>
-                <td>
-                  <button id="options_chart_add">add</button>
+                <td colspan="2" align="left">
+                  <pre>
+                    - type one contract per line, with the symbol name, date, put or call, and strike e.g.:
+
+                      MELI_011521P1100
+                      SPY_121721C330
+
+                    then hit refresh
+
+                    - during market hours, you can stream bid, ask, theoretical value into a chart
+                    - quotes are 15 minutes delayed unless you log in and tick the data box
+                  </pre>
                 </td>
               </tr>
             </table>
-          </td>
-          <td id="options_chart_containers">
-            <div id="options_chart_view"></div>
-          </td>
-        </tr>
-        <tr id="options_chart_description">
-          <td colspan="2"></td>
-        </tr>
-      </table>
-    </div>
+          </div>
+          -->
 
-    <!-- OPTIONS CHAIN -->
-    <div id="options_chain" class="content">
-      <table>
-        <tr>
-          <td valign="top" class="control">
-            <textarea cols=20, rows=20 id="opt_contracts"></textarea>
-            <br>
-            <button id="options_chain_refresh_contracts_button">refresh</button>
-          </td>
-          <td valign="top">
-            <div id="chain_view"></div>
-          </td>
-        </tr>
-        <tr>
-          <td><!-- placeholder beneath textarea --></td>
-          <td>
-            <div id="chart_view"></div>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" align="left">
+          <!-- RETURNS HISTOGRAM -->
+          <div id="returns_histogram" class="content">
+            <table>
+              <tr>
+                <td valign="top" class="control">
+                  <input type="text" cols=6 id="histogram_symbol" placeholder="<symbol>"></input><br>
+                  <input type="text" cols=10 id="histogram_days" placeholder="<period in days>"></input><br>
+                  <button id="returns_histogram_retrieve_histogram_button">
+                    update
+                  </button>
+                </td>
+                <td>
+                  <table>
+                    <tr>
+                      <td rowspan="3">
+                        <div id="returns_histogram_view"></div>
+                      </td>
+                    </tr>
+                    <td valign="top">
+                      <table id="returns_histogram_data" style="display: none;">
+                        <tr>
+                          <td>mean:</td>
+                          <td id="returns_histogram_mean"></td>
+                        </tr>
+                        <tr>
+                          <td>standard deviation:</td>
+                          <td id="returns_histogram_stdev"></td>
+                        </tr>
+                        <tr>
+                          <td>p-value:</td>
+                          <td id="returns_histogram_pv"></td>
+                        </tr>
+                      </table>
+                    </td>
+                  </table>
+                </td>
+              </tr>
+            </table>
             <pre>
-              - type one contract per line, with the symbol name, date, put or call, and strike e.g.:
-
-                MELI_011521P1100
-                SPY_121721C330
-
-              then hit refresh
-
-              - during market hours, you can stream bid, ask, theoretical value into a chart
-              - quotes are 15 minutes delayed unless you log in and tick the data box
+              - enter a stock symbol to see a histogram of daily compounded
+                returns for the period beginning N days back (default 10,000)
+              - click on the chart to get a p-value
             </pre>
-          </td>
-        </tr>
-      </table>
-    </div>
+          </div>
 
-    <!-- RETURNS HISTOGRAM -->
-    <div id="returns_histogram" class="content">
-      <table>
-        <tr>
-          <td valign="top" class="control">
-            <input type="text" cols=6 id="histogram_symbol"></input>
-            <button
-              id="returns_histogram_retrieve_histogram_button">update</button>
-          </td>
-          <td>
+          <!-- TIME AND SALES -->
+          <!--
+          <div id="time_and_sales" class="content">
             <table>
               <tr>
-                <td rowspan="3">
-                  <div id="returns_histogram_view"></div>
-                </td>
-              </tr>
-              <td valign="top">
-                <table id="returns_histogram_data" style="display: none;">
-                  <tr>
-                    <td>mean:</td>
-                    <td id="returns_histogram_mean"></td>
-                  </tr>
-                  <tr>
-                    <td>standard deviation:</td>
-                    <td id="returns_histogram_stdev"></td>
-                  </tr>
-                  <tr>
-                    <td>p-value:</td>
-                    <td id="returns_histogram_pv"></td>
-                  </tr>
-                </table>
-              </td>
-            </table>
-          </td>
-        </tr>
-      </table>
-      <pre>
-        - enter a stock symbol to see a histogram of daily compounded returns for the year-to-date
-        - click on the chart to get a p-value
-      </pre>
-    </div>
-
-    <!-- TIME AND SALES -->
-    <div id="time_and_sales" class="content">
-      <table>
-        <tr>
-          <td valign="top" class="control">
-            symbols<br>
-            <input type="text" id="ts_contracts"></input>
-            <br>
-            <button id="time_and_sales_add_contracts_button">add</button>
-            <button
-              id="time_and_sales_remove_contracts_button">remove</button>
-          </td>
-          <td>
-            <div id="tape_view">
-              <table>
-                <tr id="tape_row"></tr>
-              </table>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    <!-- MARKET PROFILE -->
-    <div id="market_profile" class="content">
-      <table>
-        <tr>
-          <td valign="top" class="control">
-            <table>
-              <tr>
-                <td>symbol</td>
-                <td><input type="text" id="mp_symbol"></input></td>
-              </tr>
-              <tr>
-                <td>calendar days</td>
-                <td>
-                  <input type="text" id="mp_days"></input>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <span title="these units are minimum price increments, e.g. cents for equities">
-                    minimum trend
-                  </span>
-                </td>
-                <td>
-                  <select id="mp_minimum_trend">
-                    <option>1</option>
-                    <option>10</option>
-                    <option>100</option>
-                    <option>1000</option>
-                    <option>10000</option>
-                  </select>
-                </td>
-              </tr>
-              <tr>
-                <td>
+                <td valign="top" class="control">
+                  symbols<br>
+                  <input type="text" id="ts_contracts"></input>
+                  <br>
+                  <button id="time_and_sales_add_contracts_button">add</button>
                   <button
-                    id="market_profile_get_chart_button">get chart</button>
+                    id="time_and_sales_remove_contracts_button">remove</button>
+                </td>
+                <td>
+                  <div id="tape_view">
+                    <table>
+                      <tr id="tape_row"></tr>
+                    </table>
+                  </div>
                 </td>
               </tr>
-          </table>
-          </td>
-          <td>
-            <div id="mp_view"></div>
-          </td>
-        </tr>
-      </table>
-    </div>
+            </table>
+          </div>
+          -->
 
-    <!-- LOGIN -->
-    <span title="requires authorization to get data through your TDAmeritrade account">
-      <div>
-        real-time data?
-        <input type="checkbox" id="real_time_data"></input>
-      </div>
-    </span>
-    <!-- CREDIT -->
-    <p>
-      charts by <a href="https://www.tradingview.com/lightweight-charts/">tradingview</a>
-    </p>
+          <!-- MARKET PROFILE -->
+          <div id="market_profile" class="content">
+            <table>
+              <tr>
+                <td valign="top" class="control">
+                  <table>
+                    <tr>
+                      <td>symbol</td>
+                      <td><input type="text" id="mp_symbol"></input></td>
+                    </tr>
+                    <tr>
+                      <td>calendar days</td>
+                      <td>
+                        <input type="text" id="mp_days"></input>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span title="these units are minimum price increments, e.g. cents for equities">
+                          minimum trend
+                        </span>
+                      </td>
+                      <td>
+                        <select id="mp_minimum_trend">
+                          <option>1</option>
+                          <option>10</option>
+                          <option>100</option>
+                          <option>1000</option>
+                          <option>10000</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <button
+                          id="market_profile_get_chart_button">get chart</button>
+                      </td>
+                    </tr>
+                </table>
+                </td>
+                <td>
+                  <div id="mp_view"></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- NORMALIZED CHART -->
+          <div id="normalized" class="content">
+            <table>
+              <tr>
+                <td id="controls">
+                  <table>
+                    <tr>
+                      <td>calendar days</td>
+                      <td>
+                        <input id="normalized_days" type="text"></input>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>presets</td>
+                      <td>
+                        <select id="normalized_presets">
+                          <option>custom</option>
+                          <option>us indices</option>
+                          <option>soybeans</option>
+                          <option>tech</option>
+                          <option>ev</option>
+                          <option>social</option>
+                          <option>dividend</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td valign="top">symbols</td>
+                      <td>
+                        <textarea cols=6, rows=20 id="normalized_symbols"></textarea>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <button id="normalized_update">update</button>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td id="chart">
+                  <div id="normalized_view"></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- VOLATILITY -->
+          <div id="volatility" class="content">
+            <table>
+              <tr>
+                <td id="controls" valign="top">
+                  <table>
+                    <tr>
+                      <td>
+                        type:
+                      </td>
+                      <td>
+                        <select id="volatility_type">
+                          <option>backward</option>
+                          <option>forward</option>
+                          <!--<option>backward monthly</option>
+                          <option>forward monthly</option>-->
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <button id="volatility_update">update</button>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td>
+                  <div id="volatility_vol_view"></div>
+                </td>
+              </tr>
+              <tr>
+                <td><!-- placeholder beneath control cell --></td>
+                <td>
+                  <div id="volatility_trader_view"></div>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- NOTEBOOKS -->
+          <!--
+          <div id="notebooks" class="content">
+            <p>run with 'ipython notebook <i>filename</i>'</p>
+            <a href="https://tvix.xyz/notebooks/rwalk.ipynb">rwalk</a>
+          </div>
+          -->
+
+          <!-- CoT API -->
+          <div id="cot_api" class="content">
+            <table>
+              <tr>
+                <td>
+                  the <a href="https://cftc.gov/MarketReports/CommitmentsofTraders/index.htm">commitment of traders report</a>
+                  offers position information for large speculative and hedging traders. while you can read the text reports and browse
+                  archive files at <a href="https://www.cftc.gov">cftc.gov</a>, this API concatenates all historical <a href="https://cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm">"futures only"</a> reports
+                  dating back to 1986, for selected contracts, and delivers it in convenient JSON or CSV format.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p><b>GET /cot/index</b></p>
+                  <p style="padding-left:5em">
+                    returns the association of contract ids with english names, and columns, from the original report, with "friendly" names.
+                    there are no parameters:<br><br>
+
+                    <a href="https://api.tvix.xyz/cot/index">https://api.tvix.xyz/cot/index</a>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p><b>GET /cot/contract/{<i>id</i>}</b></p>
+                  <p style="padding-left:5em">
+                    returns the CoT data for a given contract, in JSON by default. you may request CSV with "type=csv", e.g.:<br><br>
+                    <a href="https://api.tvix.xyz/cot/contract/001602?type=csv">https://api.tvix.xyz/cot/contract/001602?type=csv</a>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  a new report is released each friday, covering traders' positions as of tuesday.
+                  please let me know if you find any errors or would like to me to include additional information from the CoT reports in this API.
+                </td>
+              </tr>
+            </table>
+          </div>
+        </td>
+
+        <td valign="top">
+          <!-- LOGIN -->
+          <span title="requires authorization to get data through your TDAmeritrade account">
+            <div>
+              real-time data?
+              <input type="checkbox" id="real_time_data"></input>
+            </div>
+          </span>
+          <!-- CREDIT -->
+          <p>
+            contact: ot3@uw.edu
+            <br>
+            <br>
+            charts by <a href="https://www.tradingview.com/lightweight-charts/">tradingview</a>
+          </p>
+        </td>
+      </tr>
+    </table>
 
     <!-- CODE -->
     <script src="./bundle.js"></script>
