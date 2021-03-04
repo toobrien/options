@@ -147,6 +147,26 @@ class stream_client {
     return this.real_time_enabled;
   }
 
+  async levelone_futures(symbols) {
+    if (this.real_time_enabled) {
+      symbols.forEach((symbol) => {
+        if (!this.check_subscription(symbol, "levelone_futures")) {
+          const req = {
+            service: "LEVELONE_FUTURES",
+            command: "SUBS",
+            parameters: {
+              "keys": symbol,
+              "fields": "0,1,2,3"
+            }
+          };
+          this.send(req);
+        } // else: already subscribed
+      });
+    }
+
+    return this.real_time_enabled;
+  }
+
   async initiate_socket() {
     if (this.user_principals == undefined)
       this.user_principals = await this.obtain_user_principals();

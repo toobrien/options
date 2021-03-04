@@ -1,0 +1,6 @@
+
+class random {
+
+}
+
+export { random };

@@ -8,7 +8,7 @@ class strategy {
     this.id = `options_chart_strategy_${this.guid}`;
     this.body = document.createElement("table");
     this.contracts = {};
-    this.line_settings = { lineWidth: 1 };
+    this.line_settings = { lineWidth: 1, crosshairMarkerVisible: false };
     this.look_ahead = 1000;
     this.formatter = new Intl.DateTimeFormat(
                                               "en-US",

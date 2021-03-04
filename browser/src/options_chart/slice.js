@@ -7,8 +7,8 @@ class slice {
     this.id = `options_chart_slice_${guid}`;
     this.body = document.createElement("table");
     this.body.className += "test";
-    this.expiry_range = 13;
-    this.strike_range = 7;
+    this.expiry_range = 15;
+    this.strike_range = 11;
     this.default_vol = 30;                       // no contract vol, no user vol
     this.formatter = new Intl.DateTimeFormat(
                                               "en-US",

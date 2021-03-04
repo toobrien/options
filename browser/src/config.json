@@ -1,0 +1,115 @@
+{
+  "financial_futures": {
+    "sources": [
+      "https://www.cftc.gov/files/dea/history/fut_fin_txt_2020.zip",
+      "https://www.cftc.gov/files/dea/history/fut_fin_txt_2019.zip",
+      "https://www.cftc.gov/files/dea/history/fut_fin_txt_2018.zip",
+      "https://www.cftc.gov/files/dea/history/fut_fin_txt_2017.zip",
+      "https://www.cftc.gov/files/dea/history/fin_fut_txt_2006_2016.zip"
+    ]
+  },
+  "full_futures": {
+    "sources": [
+      "https://www.cftc.gov/files/dea/history/deacot2020.zip",
+      "https://www.cftc.gov/files/dea/history/deacot2019.zip",
+      "https://www.cftc.gov/files/dea/history/deacot2018.zip",
+      "https://www.cftc.gov/files/dea/history/deacot2017.zip",
+      "https://www.cftc.gov/files/dea/history/deacot1986_2016.zip"
+    ],
+    "contracts": {
+      "agricultural_and_soft": {
+        "001602": "wheat (cbot)",
+        "001612": "wheat (kc)",
+        "002602": "corn (cbot)",
+        "004603": "oats (cbot)",
+        "005602": "soybeans (cbot)",
+        "007601": "soybean oil (cbot)",
+        "026603": "soybean meal (cbot)",
+        "039601": "rough rice (cbot)",
+        "050642": "butter (cme)",
+        "052641": "milk (cme)",
+        "063642": "cheese (cme)",
+        "054642": "lean hogs (cme)",
+        "057642": "live cattle (cme)",
+        "061641": "feeder cattle (cme)",
+        "058643": "random length lumber (cme)",
+        "033661": "cotton no. 2 (nyce)",
+        "073732": "cocoa (csce)",
+        "080732": "sugar no. 11 (csce)",
+        "083731": "coffee c (csce)"
+      },
+      "interest_rates": {
+        "042601": "2yr t-note (cbot)",
+        "044601": "5yr t-note (cbot)",
+        "043602": "10yr t-note (cbot)",
+        "043607": "10yr ultra t-note (cbot)",
+        "020601": "30yr t-bond (cbot)",
+        "045601": "30 day interest rates (cbot)",
+        "134741": "3mo SOFR",
+        "134742": "1mo SOFR"
+      },
+      "energy": {
+        "023651": "natural gas (nymex)",
+        "067651": "crude oil (nymex)",
+        "111659": "gasoline (nymex)",
+        "022651": "heating oil (nymex)"
+      },
+      "indices": {
+        "1170E1": "vix (cboe)",
+        "12460+": "djia (cbot)",
+        "13874+": "s&p 500 (cme)",
+        "20974+": "nasdaq (cme)",
+        "239742": "russel 2000 (cme)",
+        "240743": "nikkei (cme)"
+      },
+      "metals": {
+        "084691": "silver (comex)",
+        "085692": "copper (comex)",
+        "088691": "gold (comex)",
+        "075651": "palladium (nymex)",
+        "076691": "platinum (nymex)",
+        "191651": "aluminum (comex)"
+      },
+      "currencies": {
+        "089741": "ruble (imm)",
+        "090741": "canadian dollar (imm)",
+        "092741": "franc (imm)",
+        "095741": "peso (imm)",
+        "096742": "pound (imm)",
+        "097741": "yen (imm)",
+        "098662": "dollar index (nyce)",
+        "099741": "euro (imm)",
+        "102741": "real (imm)",
+        "122741": "rand (imm)",
+        "133741": "bitcoin (cme)"
+      }
+    },
+    "properties": {
+      "scalars": {
+        "name": 1,
+        "contract_id": 4
+      },
+      "vectors": {
+        "date": 3,
+        "open_interest": 8,
+        "noncommercial_long_contracts": 9,
+        "noncommercial_short_contracts": 10,
+        "noncommercial_spread_contracts": 11,
+        "commercial_long_contracts": 12,
+        "commercial_short_contracts": 13,
+        "nonreportable_long_contracts": 16,
+        "nonreportable_short_contracts": 17,
+        "total_long_contracts": 14,
+        "total_short_contracts": 15,
+        "total_traders": 78,
+        "noncommercial_long_traders": 79,
+        "noncommercial_short_traders": 80,
+        "noncommercial_spread_traders": 81,
+        "commercial_long_traders": 82,
+        "commercial_short_traders": 83,
+        "total_long_traders": 84,
+        "total_short_traders": 85
+      }
+    }
+  }
+}

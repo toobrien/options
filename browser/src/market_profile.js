@@ -1,4 +1,4 @@
-import { send_request, look_back_range } from "../src/utils/browser_utils.js";
+import { look_back_range } from "../src/utils/browser_utils.js";
 
 class market_profile {
 

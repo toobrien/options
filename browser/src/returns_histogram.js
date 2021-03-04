@@ -1,4 +1,5 @@
 import { createChart } from "../src/lightweight-charts.js";
+import { look_back_range } from "../src/utils/browser_utils.js";
 
 class returns_histogram {
 
@@ -11,9 +12,17 @@ class returns_histogram {
     const symbol = document.getElementById("histogram_symbol")
                            .value.toUpperCase();
 
+    const days = parseInt(document.getElementById("histogram_days").value);
+    console.log(days);
+    const range = look_back_range(days);
+    console.log(range.start.getTime(), range.end.getTime());
+
     this.update_histogram(
       symbol,
-      await this.client.price_history(symbol,"ytd",1,"daily","1","","",false)
+      await this.client.price_history(
+        symbol, "month", undefined, "daily", 1,
+        range.start.getTime(), range.end.getTime(), false
+      )
     )
   }
 
@@ -78,8 +87,8 @@ class returns_histogram {
     this.chart = window.LightweightCharts.createChart(
               document.getElementById("returns_histogram_view"),
               {
-                width: 400,
-                height: 300,
+                width: this.chart_width,
+                height: this.chart_height,
                 timeScale: {
                   // formats x-axis as number, not date
                   tickMarkFormatter: (time, tickMarkType, locale) => {
@@ -127,7 +136,7 @@ class returns_histogram {
           buckets[i].color = this.default_color;
 
         document.getElementById("returns_histogram_pv")
-                .innerHTML = (1 - count / returns.length).toFixed(2);
+                .innerHTML = (1 - count / returns.length).toFixed(4);
       } else {
         for (var i = 0; i < this.range; i++)
           buckets[i].color = this.default_color;
@@ -141,9 +150,11 @@ class returns_histogram {
 
   constructor(client) {
     this.chart = undefined;
+    this.chart_width = 800;
+    this.chart_height = 400;
     this.data = document.getElementById("returns_histogram_data");
     this.client = client;
-    this.range = 60;
+    this.range = 100;
     this.default_color = "#00CC00";
     this.highlight_color = "#CC0000";
   }

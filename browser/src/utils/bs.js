@@ -16,7 +16,7 @@ function d2(d1_, vol, time) {
 
 function call(price, strike, rate, vol, time) {
   vol /= 100;                                     // as a percentage
-  time /= 365;                                    // percentage of trading year (should denominator be trading days (252)?
+  time /= 252;                                    // percentage of trading year (should denominator be trading days (252)?
 
   const d1_ = d1(price, strike, rate, vol, time)
   const d2_ = d2(d1_, vol, time);
@@ -28,7 +28,7 @@ function call(price, strike, rate, vol, time) {
 }
 
 function put(price, strike, rate, vol, time) {
-  return strike * Math.exp(-rate * (time/365)) - price + call(price, strike, rate, vol, time);
+  return strike * Math.exp(-rate * (time / 252)) - price + call(price, strike, rate, vol, time);
 }
 
 function theoretical(underlying, strike, rate, vol, time, type) {
@@ -43,7 +43,7 @@ function theoretical(underlying, strike, rate, vol, time, type) {
 // mcmillan, pg. 803
 function itm(price, strike, vol, time, type) {
   vol /= 100;
-  time /= 365;
+  time /= 252;
 
   const p = cdf(Math.log(price / strike) / (vol * Math.sqrt(time)));
 
@@ -53,7 +53,7 @@ function itm(price, strike, vol, time, type) {
 // probability of price moving below the target
 function below(price, target, vol, time) {
   vol /= 100;
-  time /= 365;
+  time /= 252;
 
   return cdf(Math.log(target / price) / (vol * Math.sqrt(time)));
 }
